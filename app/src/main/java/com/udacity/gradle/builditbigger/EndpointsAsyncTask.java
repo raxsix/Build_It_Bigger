@@ -1,16 +1,11 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.util.Pair;
-import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
-import com.udacity.gradle.jokedesplay.JokeActivity;
 
 import java.io.IOException;
 
@@ -19,13 +14,15 @@ import eu.raxsix.gradle.backend.myApi.MyApi;
 /**
  * Created by Ragnar on 10/4/2015.
  */
-class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
+class EndpointsAsyncTask extends AsyncTask<OnJokeReceivedListener, Void, String> {
+
     private static MyApi myApiService = null;
-    private Context context;
+    private OnJokeReceivedListener listener;
 
     @Override
-    protected String doInBackground(Pair<Context, String>... params) {
-        if(myApiService == null) {  // Only do this once
+    protected String doInBackground(OnJokeReceivedListener... params) {
+
+        if (myApiService == null) {  // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
                     .setRootUrl("https://gradle-1088.appspot.com/_ah/api/")
                     .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
@@ -39,11 +36,11 @@ class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> 
             myApiService = builder.build();
         }
 
-        context = params[0].first;
-        String name = params[0].second;
+        listener = params[0];
+
 
         try {
-            return myApiService.sayHi(name).execute().getData();
+            return myApiService.tellJoke().execute().getData();
         } catch (IOException e) {
             return e.getMessage();
         }
@@ -52,9 +49,10 @@ class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> 
     @Override
     protected void onPostExecute(String result) {
 
-        Intent intent = new Intent(context, JokeActivity.class);
-        intent.putExtra(JokeActivity.JOKE_KEY, result);
-        context.startActivity(intent);
+        listener.onReceived(result);
+
+      /*
+       */
 
         // Toast.makeText(context, result, Toast.LENGTH_LONG).show();
     }

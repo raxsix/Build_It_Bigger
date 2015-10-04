@@ -14,7 +14,7 @@ import com.udacity.gradle.jokedesplay.JokeActivity;
 import com.udacity.gradle.jokesource.JokeSource;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements OnJokeReceivedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +47,17 @@ public class MainActivity extends ActionBarActivity {
 
     public void tellJoke(View view){
 
-        JokeSource joke = new JokeSource();
-
-        //Toast.makeText(this, joke.getJoke(), Toast.LENGTH_SHORT).show();
-
-        new EndpointsAsyncTask().execute(new Pair<Context, String>(this, joke.getJoke()));
+       new EndpointsAsyncTask().execute(this);
 
     }
 
 
+    @Override
+    public void onReceived(String joke) {
+
+        Intent intent = new Intent(this, JokeActivity.class);
+        intent.putExtra(JokeActivity.JOKE_KEY, joke);
+        startActivity(intent);
+
+    }
 }
