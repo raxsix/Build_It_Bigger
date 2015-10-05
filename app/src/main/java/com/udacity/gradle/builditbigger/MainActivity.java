@@ -1,20 +1,13 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.v4.util.Pair;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
-
-import com.udacity.gradle.jokedesplay.JokeActivity;
-import com.udacity.gradle.jokesource.JokeSource;
 
 
-public class MainActivity extends ActionBarActivity implements OnJokeReceivedListener {
+public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,19 +38,4 @@ public class MainActivity extends ActionBarActivity implements OnJokeReceivedLis
         return super.onOptionsItemSelected(item);
     }
 
-    public void tellJoke(View view){
-
-       new EndpointsAsyncTask().execute(this);
-
-    }
-
-
-    @Override
-    public void onReceived(String joke) {
-
-        Intent intent = new Intent(this, JokeActivity.class);
-        intent.putExtra(JokeActivity.JOKE_KEY, joke);
-        startActivity(intent);
-
-    }
 }

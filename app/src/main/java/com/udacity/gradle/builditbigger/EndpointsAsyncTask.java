@@ -51,9 +51,5 @@ class EndpointsAsyncTask extends AsyncTask<OnJokeReceivedListener, Void, String>
 
         listener.onReceived(result);
 
-      /*
-       */
-
-        // Toast.makeText(context, result, Toast.LENGTH_LONG).show();
     }
 }
