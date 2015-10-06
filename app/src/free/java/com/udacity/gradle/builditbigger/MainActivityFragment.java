@@ -9,14 +9,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.udacity.gradle.jokedesplay.JokeActivity;
 
 
 public class MainActivityFragment extends Fragment implements OnJokeReceivedListener {
 
+    private String mJoke;
     private ProgressBar mSpinner;
+    private InterstitialAd mInterstitialAd;
 
     public MainActivityFragment() {
     }
@@ -26,6 +30,13 @@ public class MainActivityFragment extends Fragment implements OnJokeReceivedList
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
+        mSpinner = (ProgressBar) root.findViewById(R.id.progressBar);
+
+        CreateInterstitialAd();
+
+        loadInterstitialAd();
+
+
         Button button = (Button) root.findViewById(R.id.joke_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,8 +45,33 @@ public class MainActivityFragment extends Fragment implements OnJokeReceivedList
             }
         });
 
-        mSpinner = (ProgressBar) root.findViewById(R.id.progressBar);
 
+        CreateBannerAd(root);
+
+        return root;
+    }
+
+
+
+    private void CreateInterstitialAd() {
+        mInterstitialAd = new InterstitialAd(getActivity());
+        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_ad_unit_id));
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                startJokeActivity();
+            }
+        });
+    }
+
+    private void loadInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+        mInterstitialAd.loadAd(adRequest);
+    }
+
+    private void CreateBannerAd(View root) {
         AdView mAdView = (AdView) root.findViewById(R.id.adView);
         // Create an ad request. Check logcat output for the hashed device ID to
         // get test ads on a physical device. e.g.
@@ -44,7 +80,6 @@ public class MainActivityFragment extends Fragment implements OnJokeReceivedList
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .build();
         mAdView.loadAd(adRequest);
-        return root;
     }
 
 
@@ -53,13 +88,26 @@ public class MainActivityFragment extends Fragment implements OnJokeReceivedList
         new EndpointsAsyncTask().execute(this);
     }
 
+    /**
+     *Callback method for fetchJoke
+     */
     @Override
     public void onReceived(String joke) {
 
+        mJoke = joke;
         mSpinner.setVisibility(View.INVISIBLE);
 
+        // Displaying the interstitial
+        if (mInterstitialAd != null && mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            startJokeActivity();
+        }
+    }
+
+    private void startJokeActivity() {
         Intent intent = new Intent(getActivity(), JokeActivity.class);
-        intent.putExtra(JokeActivity.JOKE_KEY, joke);
+        intent.putExtra(JokeActivity.JOKE_KEY, mJoke);
         startActivity(intent);
     }
 }

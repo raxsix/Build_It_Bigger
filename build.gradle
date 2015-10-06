@@ -17,3 +17,15 @@ allprojects {
         jcenter()
     }
 }
+
+evaluationDependsOn ":app"
+evaluationDependsOn ":backend"
+
+project(":backend"){
+    appengine{
+        daemon true
+    }
+}
+
+task runAppEngineAndTest(dependsOn: ":backend:appengineRun") { }
+runAppEngineAndTest.finalizedBy([":app:connectedCheck", ":backend:appengineStop"])
